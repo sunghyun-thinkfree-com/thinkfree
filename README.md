@@ -18,7 +18,7 @@ Docker 이미지는 [Amazon ECR](https://aws.amazon.com/ecr/) 에 업로드되�
 ### 1. 스크립트 다운로드
 
 ```bash
-curl -O https://raw.githubusercontent.com/your-org/your-repo/main/tfo-install.sh
+curl -O https://raw.githubusercontent.com/sunghyun-thinkfree-com/thinkfree/refs/heads/master/tfo-install.sh
 chmod +x tfo-install.sh
 ```
 

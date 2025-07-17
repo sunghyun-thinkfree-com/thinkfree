@@ -3,12 +3,11 @@
 set -e
 
 # === 설정 영역 ===
-REPO_URL="https://raw.githubusercontent.com/your-org/your-repo/main/docker-compose.yml"
-ENV_TEMPLATE_URL="https://raw.githubusercontent.com/your-org/your-repo/main/.env.example"
+REPO_URL="https://raw.githubusercontent.com/sunghyun-thinkfree-com/thinkfree/refs/heads/master/docker/docker-compose.yml"
+ENV_TEMPLATE_URL="https://raw.githubusercontent.com/sunghyun-thinkfree-com/thinkfree/refs/heads/master/docker/.env"
 ENV_FILE=".env"
-USE_ECR=false      # ECR 사용 시 true 로 설정
 ECR_REGION="ap-northeast-2"
-ECR_REPO_URL="<account_id>.dkr.ecr.ap-northeast-2.amazonaws.com"
+ECR_REPO_URL="958750823146.dkr.ecr.ap-northeast-2.amazonaws.com"
 # =================
 
 echo "🔍 Docker 설치 확인..."
