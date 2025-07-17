@@ -1,0 +1,172 @@
+x-default: &default-env
+  WEBOFFICE_RUNNING_TYPE: "docker"
+
+x-redis:
+  redis-image: &redis-image
+    image: ${IMAGE_REGISTRY}/${REDIS_REPOSITORY}:${REDIS_TAG}
+  redis-env: &redis-env
+    REDIS_MASTER_HOST: ${REDIS_MASTER_HOST}
+    REDIS_PORT: ${REDIS_PORT}
+    REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+x-mongodb:
+  mongodb-image: &mongodb-image
+    image: ${IMAGE_REGISTRY}/${MONGODB_REPOSITORY}:${MONGODB_TAG}
+  mongodb-env: &mongodb-env
+    MONGODB_PRIMARY_HOST: ${MONGODB_PRIMARY_HOST}
+    MONGODB_PORT: ${MONGODB_PORT}
+    MONGODB_ROOT_DB: ${MONGODB_ROOT_DB}
+    MONGODB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME}
+    MONGODB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
+    MONGODB_ADMIN_DB: ${MONGODB_ADMIN_DB}
+    MONGODB_ADMIN_USERNAME: ${MONGODB_ADMIN_USERNAME}
+    MONGODB_ADMIN_PASSWORD: ${MONGODB_ADMIN_PASSWORD}
+    MONGODB_WORD_DB: ${MONGODB_WORD_DB}
+    MONGODB_WORD_USERNAME: ${MONGODB_WORD_USERNAME}
+    MONGODB_WORD_PASSWORD: ${MONGODB_WORD_PASSWORD}
+    MONGODB_CELL_DB: ${MONGODB_CELL_DB}
+    MONGODB_CELL_USERNAME: ${MONGODB_CELL_USERNAME}
+    MONGODB_CELL_PASSWORD: ${MONGODB_CELL_PASSWORD}
+    MONGODB_SHOW_DB: ${MONGODB_SHOW_DB}
+    MONGODB_SHOW_USERNAME: ${MONGODB_SHOW_USERNAME}
+    MONGODB_SHOW_PASSWORD: ${MONGODB_SHOW_PASSWORD}
+    MONGODB_FILE_DB: ${MONGODB_FILE_DB}
+    MONGODB_FILE_USERNAME: ${MONGODB_FILE_USERNAME}
+    MONGODB_FILE_PASSWORD: ${MONGODB_FILE_PASSWORD}
+    MONGODB_ADMIN_IPS: ${MONGODB_ADMIN_IPS:-}
+  mongodb-dependencies: &mongodb-dependencies
+    mongodb-primary:
+      condition: service_healthy
+
+x-broker:
+  broker-image: &broker-image
+    image: ${IMAGE_REGISTRY}/${BROKER_REPOSITORY}:${BROKER_TAG}
+  broker-env: &broker-env
+    BROKER_MASTER_HOST: ${BROKER_MASTER_HOST}
+
+x-filter:
+  filter-image: &filter-image
+    image: ${IMAGE_REGISTRY}/${FILTER_REPOSITORY}:${FILTER_TAG}
+
+x-document-word:
+  document-word-image: &document-word-image
+    image: ${IMAGE_REGISTRY}/${DOCUMENT_WORD_REPOSITORY}:${DOCUMENT_WORD_TAG}
+  document-word-env: &document-word-env
+    DOCUMENT_WORD_HOST: ${DOCUMENT_WORD_HOST}
+
+x-document-show:
+  document-show-image: &document-show-image
+    image: ${IMAGE_REGISTRY}/${DOCUMENT_SHOW_REPOSITORY}:${DOCUMENT_SHOW_TAG}
+  document-show-env: &document-show-env
+    DOCUMENT_SHOW_HOST: ${DOCUMENT_SHOW_HOST}
+
+x-was-env:
+  was-image: &was-image
+    image: ${IMAGE_REGISTRY}/${WAS_REPOSITORY}:${WAS_TAG}
+  was-env: &was-env
+    WAS_HOST: ${WAS_HOST}
+
+services:
+  redis-master:
+#    <<: *redis-image
+    build:
+      context: redis
+      dockerfile: redis.Dockerfile
+    hostname: redis-master-0
+    environment:
+      <<: [*default-env, *redis-env]
+    restart: always
+    networks:
+      - thinkfree-network
+
+  mongodb-primary:
+#    <<: *mongodb-image
+    build:
+      context: mongodb
+      dockerfile: mongodb.Dockerfile
+    hostname: mongodb-primary-0
+    environment:
+      <<: [*default-env, *mongodb-env]
+    restart: always
+    healthcheck:
+      test: echo "db.runCommand('ping').ok" | mongosh --quiet
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - thinkfree-network
+
+  broker-master:
+#    <<: *broker-image
+    build:
+      context: broker
+      dockerfile: broker.odf.Dockerfile
+#    build:
+#      context: broker
+#      dockerfile: broker.Dockerfile
+    hostname: broker-master-0
+    environment:
+      <<: *default-env
+    restart: always
+    networks:
+      - thinkfree-network
+
+  filter:
+#    <<: *filter-image
+    build:
+      context: filter
+      dockerfile: filter.odf.Dockerfile
+#    build:
+#      context: filter
+#      dockerfile: filter.Dockerfile
+    environment:
+      <<: [*default-env, *broker-env, *mongodb-env]
+    restart: always
+    depends_on:
+      <<: *mongodb-dependencies
+    networks:
+      - thinkfree-network
+
+  document-word:
+#    <<: *document-word-image
+    build:
+      context: document
+      dockerfile: document.word.Dockerfile
+    environment:
+      <<: [*default-env, *redis-env, *mongodb-env, *document-word-env]
+    restart: always
+    depends_on:
+      <<: *mongodb-dependencies
+    networks:
+      - thinkfree-network
+
+  document-show:
+#    <<: *document-show-image
+    build:
+      context: document
+      dockerfile: document.show.Dockerfile
+    environment:
+      <<: [*default-env, *redis-env, *mongodb-env, *document-show-env]
+    restart: always
+    depends_on:
+      <<: *mongodb-dependencies
+    networks:
+      - thinkfree-network
+
+  was:
+#    <<: *was-image
+    build:
+      context: was
+      dockerfile: was.Dockerfile
+    environment:
+      <<: [*default-env, *redis-env, *mongodb-env, *document-word-env, *document-show-env, *broker-env, *was-env]
+    restart: always
+    ports:
+      - 80:80
+    depends_on:
+      <<: *mongodb-dependencies
+    networks:
+      - thinkfree-network
+
+networks:
+  thinkfree-network:
