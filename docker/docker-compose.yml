@@ -68,10 +68,7 @@ x-was-env:
 
 services:
   redis-master:
-#    <<: *redis-image
-    build:
-      context: redis
-      dockerfile: redis.Dockerfile
+    <<: *redis-image
     hostname: redis-master-0
     environment:
       <<: [*default-env, *redis-env]
@@ -80,10 +77,7 @@ services:
       - thinkfree-network
 
   mongodb-primary:
-#    <<: *mongodb-image
-    build:
-      context: mongodb
-      dockerfile: mongodb.Dockerfile
+    <<: *mongodb-image
     hostname: mongodb-primary-0
     environment:
       <<: [*default-env, *mongodb-env]
@@ -97,13 +91,7 @@ services:
       - thinkfree-network
 
   broker-master:
-#    <<: *broker-image
-    build:
-      context: broker
-      dockerfile: broker.odf.Dockerfile
-#    build:
-#      context: broker
-#      dockerfile: broker.Dockerfile
+    <<: *broker-image
     hostname: broker-master-0
     environment:
       <<: *default-env
@@ -112,13 +100,7 @@ services:
       - thinkfree-network
 
   filter:
-#    <<: *filter-image
-    build:
-      context: filter
-      dockerfile: filter.odf.Dockerfile
-#    build:
-#      context: filter
-#      dockerfile: filter.Dockerfile
+    <<: *filter-image
     environment:
       <<: [*default-env, *broker-env, *mongodb-env]
     restart: always
@@ -128,10 +110,7 @@ services:
       - thinkfree-network
 
   document-word:
-#    <<: *document-word-image
-    build:
-      context: document
-      dockerfile: document.word.Dockerfile
+    <<: *document-word-image
     environment:
       <<: [*default-env, *redis-env, *mongodb-env, *document-word-env]
     restart: always
@@ -141,10 +120,7 @@ services:
       - thinkfree-network
 
   document-show:
-#    <<: *document-show-image
-    build:
-      context: document
-      dockerfile: document.show.Dockerfile
+    <<: *document-show-image
     environment:
       <<: [*default-env, *redis-env, *mongodb-env, *document-show-env]
     restart: always
@@ -154,10 +130,7 @@ services:
       - thinkfree-network
 
   was:
-#    <<: *was-image
-    build:
-      context: was
-      dockerfile: was.Dockerfile
+    <<: *was-image
     environment:
       <<: [*default-env, *redis-env, *mongodb-env, *document-word-env, *document-show-env, *broker-env, *was-env]
     restart: always
