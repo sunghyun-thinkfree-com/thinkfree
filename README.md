@@ -18,7 +18,7 @@ Docker 이미지는 [Amazon ECR](https://aws.amazon.com/ecr/) 에 업로드되�
 ### 1. 스크립트 다운로드
 
 ```bash
-curl -O https://raw.githubusercontent.com/sunghyun-thinkfree-com/thinkfree/refs/heads/master/tfo-install.sh
+curl -O https://raw.githubusercontent.com/sunghyun-thinkfree-com/thinkfree/refs/heads/master/docker/tfo-install.sh
 chmod +x tfo-install.sh
 ```
 
@@ -53,12 +53,3 @@ $ ./tfo-install.sh run
 ✅ 모든 작업이 완료되었습니다!
 ```
 
----
-
-## 📄 커스텀 .env 파일 설정 (옵션)
-
-`.env.example` 템플릿을 기반으로 필요한 값을 설정할 수 있습니다.
-```bash
-cp .env.example .env
-vi .env
-```
